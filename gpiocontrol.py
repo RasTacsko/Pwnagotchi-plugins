@@ -3,7 +3,7 @@ from gpiozero import Button, RotaryEncoder
 import subprocess
 import pwnagotchi.plugins as plugins
 
-class GPIOButtons(plugins.Plugin):
+class GPIOControl(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
     __version__ = '0.1.0'
     __license__ = 'GPL3'
