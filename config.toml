@@ -1,0 +1,12 @@
+main.plugins.gpiocontrol.gpios.4.short_press = "python /home/pi/pwnmenucmd.py ok"
+main.plugins.gpiocontrol.gpios.4.long_press = "python /home/pi/pwnmenucmd.py close"
+main.plugins.gpiocontrol.gpios.17.short_press = "echo 'Short Press on GPIO 17'"
+main.plugins.gpiocontrol.gpios.17.long_press = "echo 'Long Press on GPIO 17'"
+
+main.plugins.gpiocontrol.encoder.a = 5
+main.plugins.gpiocontrol.encoder.b = 6
+main.plugins.gpiocontrol.encoder.button = 13
+main.plugins.gpiocontrol.encoder.up_command = "echo 'Encoder Rotated Up'"
+main.plugins.gpiocontrol.encoder.down_command = "echo 'Encoder Rotated Down'"
+main.plugins.gpiocontrol.encoder.short_press = "echo 'Encoder Button Short Pressed'"
+main.plugins.gpiocontrol.encoder.long_press = "echo 'Encoder Button Long Pressed'"
