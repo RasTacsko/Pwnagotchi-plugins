@@ -1,12 +1,28 @@
 #!/bin/bash
 
+# Exit immediately if any command fails
+set -e
+
 # Variables
 REPO_URL="https://github.com/RasTacsko/pwnagotchi_dipslayWIP.git"
 CLONE_DIR="/tmp/DisplayDrivers"   # Temporary directory to clone the repository
-TARGET_FILE="/usr/local/lib/python3.11/dist-packages/pwnagotchi/utils.py"  # The file to overwrite
-TARGET_DIR="/usr/local/lib/python3.11/dist-packages/pwnagotchi/ui/"    # The directory to overwrite
 SOURCE_FILE="/pwnagotchi/utils.py"     # Source file from the repo
 SOURCE_DIR="/pwnagotchi/ui/"       # Source folder from the repo
+# Prompt for OS architecture
+echo "Is this system 32-bit or 64-bit?"
+read -p "(Enter 32 or 64): " ARCH
+
+# Set target paths based on user input
+if [ "$ARCH" == "32" ]; then
+    TARGET_FILE="/usr/local/lib/python3.7/dist-packages/pwnagotchi/utils.py"  # The file to overwrite
+    TARGET_DIR="/usr/local/lib/python3.7/dist-packages/pwnagotchi/ui/"    # The directory to overwrite
+elif [ "$ARCH" == "64" ]; then
+    TARGET_FILE="/usr/local/lib/python3.11/dist-packages/pwnagotchi/utils.py"  # The file to overwrite
+    TARGET_DIR="/usr/local/lib/python3.11/dist-packages/pwnagotchi/ui/"    # The directory to overwrite
+else
+    echo "Invalid input. Please enter 32 or 64."
+    exit 1
+fi
 
 # Clone the repository
 echo "Cloning repository..."
@@ -31,4 +47,6 @@ sudo cp -rf "$CLONE_DIR/$SOURCE_DIR" "$TARGET_DIR"
 echo "Cleaning up..."
 rm -rf "$CLONE_DIR"
 
+# Ensure the script exits successfully
 echo "Done! File and folder have been copied and overwritten."
+exit 0
