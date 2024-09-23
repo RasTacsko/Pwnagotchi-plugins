@@ -14,11 +14,11 @@ read -p "(Enter 32 or 64): " ARCH
 
 # Set target paths based on user input
 if [ "$ARCH" == "32" ]; then
-    TARGET_FILE="/usr/local/lib/python3.7/dist-packages/pwnagotchi/utils.py"  # The file to overwrite
-    TARGET_DIR="/usr/local/lib/python3.7/dist-packages/pwnagotchi/ui/"    # The directory to overwrite
+    TARGET_FILE="/usr/local/lib/python3.9/dist-packages/pwnagotchi/utils.py"  # The file to overwrite
+    TARGET_DIR="/usr/local/lib/python3.9/dist-packages/pwnagotchi/"    # The directory to overwrite
 elif [ "$ARCH" == "64" ]; then
     TARGET_FILE="/usr/local/lib/python3.11/dist-packages/pwnagotchi/utils.py"  # The file to overwrite
-    TARGET_DIR="/usr/local/lib/python3.11/dist-packages/pwnagotchi/ui/"    # The directory to overwrite
+    TARGET_DIR="/usr/local/lib/python3.11/dist-packages/pwnagotchi/"    # The directory to overwrite
 else
     echo "Invalid input. Please enter 32 or 64."
     exit 1
