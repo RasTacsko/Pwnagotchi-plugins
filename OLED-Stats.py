@@ -13,6 +13,7 @@ class OLEDStats(plugins.Plugin):
 
     def __init__(self):
         self.I2C1 = 0x3C
+        self.I2C2 = 0x3D
         self.WIDTH = 128
         self.HEIGHT = 64
         self.FONTSIZE = 16
@@ -20,26 +21,22 @@ class OLEDStats(plugins.Plugin):
 
         # Get the directory of this script
         self.plugin_dir = os.path.dirname(os.path.realpath(__file__))
+        # Load fonts using absolute paths
+        font_path = os.path.join(self.plugin_dir, 'PixelOperator.ttf')
+        icon_font_path = os.path.join(self.plugin_dir, 'lineawesome-webfont.ttf')
+        self.font = ImageFont.truetype(font_path, 16)
+        self.icon_font = ImageFont.truetype(icon_font_path, 18)
 
         # Initialize OLED display
         self.oled1 = EPD(address=self.I2C1, width=self.WIDTH, height=self.HEIGHT)
         self.oled1.Init()
         self.oled1.Clear()
-
         # Create blank image for drawing
         self.width = self.oled1.width
         self.height = self.oled1.height
         self.image = Image.new('1', (self.width, self.height))
-
         # Get drawing object
         self.draw = ImageDraw.Draw(self.image)
-
-        # Load fonts using absolute paths
-        font_path = os.path.join(self.plugin_dir, 'PixelOperator.ttf')
-        icon_font_path = os.path.join(self.plugin_dir, 'lineawesome-webfont.ttf')
-
-        self.font = ImageFont.truetype(font_path, 16)
-        self.icon_font = ImageFont.truetype(icon_font_path, 18)
 
     def on_ui_update(self, ui):
         # Clear the image
