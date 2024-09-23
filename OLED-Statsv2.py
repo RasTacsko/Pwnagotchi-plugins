@@ -6,7 +6,6 @@ from pwnagotchi.ui.hw.libs.i2coled.epd import EPD
 import subprocess
 import pwnagotchi.plugins as plugins
 from datetime import datetime
-import psutil
 
 class OLEDStats(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
@@ -21,6 +20,11 @@ class OLEDStats(plugins.Plugin):
         self.FONTSIZE = 16
         
         self.active = True
+        self.ip_index = 0  # Track the current IP to display
+        self.ip_last_update = time.time()  # Last time IP was updated
+
+        # Get all IP addresses at startup
+        self.ip_addresses = self.get_ip_addresses()
 
         # Get the directory of this script
         self.plugin_dir = os.path.dirname(os.path.realpath(__file__))
@@ -51,35 +55,26 @@ class OLEDStats(plugins.Plugin):
         self.image2 = Image.new('1', (self.width, self.height))
         self.draw2 = ImageDraw.Draw(self.image2)
 
+
+    def get_ip_addresses(self):
+        # Fetch all IP addresses
+        ip_output = subprocess.check_output("hostname -I", shell=True)
+        ip_list = ip_output.decode('utf-8').strip().split(' ')
+        return ip_list if ip_list else ["Unavailable"]
+
+    def on_loaded(self):
+        logging.info("OLED-Stats plugin loaded")
+
     def on_ui_update(self, ui):
         if not self.active:
             return  # Exit if the plugin has been unloaded
         # Clear image1
         self.draw1.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
         # System monitoring commands
-        # IP = subprocess.check_output("hostname -I | cut -d' ' -f1 | head --bytes -1", shell=True)
-        # CPU = subprocess.check_output("top -bn1 | grep load | awk '{printf \"%.2fLA\", $(NF-2)}'", shell=True)
-        # MemUsage = subprocess.check_output("free -m | awk 'NR==2{printf \"%.2f%%\", $3*100/$2 }'", shell=True)
-        # Disk = subprocess.check_output("df -h | awk '$NF==\"/\"{printf \"%d/%dGB\", $3,$2}'", shell=True)
-        # Temperature = subprocess.check_output("vcgencmd measure_temp | cut -d '=' -f 2 | head --bytes -1", shell=True)
-        def get_ip_address():
-            addrs = psutil.net_if_addrs()
-            for iface, iface_info in addrs.items():
-                for addr in iface_info:
-                    if addr.family == psutil.AF_INET and iface != 'lo':
-                        return addr.address
-            return "Unavailable"
-        IP = get_ip_address()
-#        IP = psutil.net_if_addrs()['wlan0'][0].address
-        CPU = f"{psutil.getloadavg()[0]:.2f}LA"
-        MemUsage = f"{psutil.virtual_memory().percent:.2f}%"
-        disk_usage = psutil.disk_usage('/')
-        Disk = f"{disk_usage.used // (2**30)}/{disk_usage.total // (2**30)}GB"
-        temp = psutil.sensors_temperatures()
-        if 'coretemp' in temp:
-            Temperature = f"{temp['coretemp'][0].current}°C"
-        else:
-            Temperature = "Unavailable"
+        CPU = subprocess.check_output("top -bn1 | grep load | awk '{printf \"%.2fLA\", $(NF-2)}'", shell=True)
+        MemUsage = subprocess.check_output("free -m | awk 'NR==2{printf \"%.2f%%\", $3*100/$2 }'", shell=True)
+        Disk = subprocess.check_output("df -h | awk '$NF==\"/\"{printf \"%d/%dGB\", $3,$2}'", shell=True)
+        Temperature = subprocess.check_output("vcgencmd measure_temp | cut -d '=' -f 2 | head --bytes -1", shell=True)
 
         # Draw icons and stats
         self.draw1.text((0, 5), chr(62171), font=self.icon_font, fill=255)  # CPU icon
@@ -92,7 +87,17 @@ class OLEDStats(plugins.Plugin):
         self.draw1.text((87, 5), str(Temperature, 'utf-8'), font=self.font, fill=255)
         self.draw1.text((19, 25), str(MemUsage, 'utf-8'), font=self.font, fill=255)
         self.draw1.text((87, 25), str(Disk, 'utf-8'), font=self.font, fill=255)
-        self.draw1.text((19, 45), str(IP, 'utf-8'), font=self.font, fill=255)
+#        self.draw1.text((19, 45), str(IP, 'utf-8'), font=self.font, fill=255)
+        # Cycle through IP addresses every 3 seconds
+        current_time = time.time()
+        if current_time - self.ip_last_update >= 3:
+            self.ip_index = (self.ip_index + 1) % len(self.ip_addresses)  # Increment index and cycle
+            self.ip_last_update = current_time
+        
+        current_ip = self.ip_addresses[self.ip_index]
+        self.draw1.text((19, 45), current_ip, font=self.font, fill=255)
+
+
         # Display image on OLED1
         self.oled1.display(self.image1)
         
@@ -111,19 +116,13 @@ class OLEDStats(plugins.Plugin):
     def on_unload(self, ui):
         # Set the active flag to False to stop updates
         self.active = False
-
+        # Wait to ensure the ui_update is stopped
+        time.sleep(1.0)
         # Clear the OLED displays
-        self.oled1.Clear()
-        self.oled2.Clear()
-
+        self.draw1.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
+        self.draw2.rectangle((0, 0, self.width, self.height), outline=0, fill=0)
+        self.oled1.display(self.image1)
+        self.oled2.display(self.image2)
         # Wait to ensure the displays are cleared
-        time.sleep(0.5)
-
-        # Turn off the OLED displays (if supported by the driver)
-        try:
-            self.oled1.Sleep()  # Turn off the first screen
-            self.oled2.Sleep()  # Turn off the second screen
-        except AttributeError:
-            logging.warning("Sleep method not supported for this display driver")
-        
+        time.sleep(1.0)
         logging.info("OLED-Stats plugin unloaded and screens turned off")
