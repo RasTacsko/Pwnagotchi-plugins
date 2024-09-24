@@ -25,12 +25,12 @@ class OLEDStats(plugins.Plugin):
         # Get the directory of this script
         self.plugin_dir = os.path.dirname(os.path.realpath(__file__))
         # Load fonts using absolute paths
-        font_path = os.path.join(self.plugin_dir, 'PixelOperator.ttf')
-        self.font = ImageFont.truetype(font_path, 14)
-	data_font_path = os.path.join(self.plugin_dir, 'PixelOperator.ttf')
+        font_path = os.path.join(self.plugin_dir, './OLEDstats/PixelOperator.ttf')
+        self.font = ImageFont.truetype(font_path, 12)
+        data_font_path = os.path.join(self.plugin_dir, './OLEDstats/PixelOperator.ttf')
         self.data_font = ImageFont.truetype(font_path, 24)
-        icon_font_path = os.path.join(self.plugin_dir, 'lineawesome-webfont.ttf')
-        self.icon_font = ImageFont.truetype(icon_font_path, 14)
+        icon_font_path = os.path.join(self.plugin_dir, './OLEDstats/lineawesome-webfont.ttf')
+        self.icon_font = ImageFont.truetype(icon_font_path, 16)
 
         # Initialize OLED display1
         self.oled1 = EPD(address=self.I2C1, width=self.WIDTH, height=self.HEIGHT)
@@ -82,7 +82,7 @@ class OLEDStats(plugins.Plugin):
         self.draw1.text((0, 17), chr(62609), font=self.icon_font, fill=255)  # Temperature icon
         self.draw1.text((19, 17), str(Temperature, 'utf-8'), font=self.font, fill=255)
 
-        self.draw1.rectangle((0, 32, 15, 47), outline=255, fill=0)
+        self.draw1.rectangle((0, 34, 15, 47), outline=255, fill=0)
         self.draw1.text((0, 33), chr(62776), font=self.icon_font, fill=255)  # Memory icon
         self.draw1.text((19, 33), str(MemUsage, 'utf-8'), font=self.font, fill=255)
 
@@ -99,13 +99,14 @@ class OLEDStats(plugins.Plugin):
         date_str = now.strftime("%y-%m-%d")
         time_str = now.strftime("%H:%M:%S")
         # Write the date and time to the second screen
-        self.draw2.text((10, 20), date_str, font=self.font, fill=255)
-        self.draw2.text((10, 40), time_str, font=self.font, fill=255)
+        self.draw2.text((0, 0), date_str, font=self.font, fill=255)
+        self.draw2.text((0, 21), time_str, font=self.font, fill=255)
 
+        self.draw2.rectangle((0, 48, 15, 63), outline=255, fill=0)
         self.draw2.text((0, 49), chr(61931), font=self.icon_font, fill=255)  # Wi-Fi icon
         # Cycle through IP addresses every 3 seconds
         current_time = time.time()
-        if current_time - self.ip_last_update >= 3:
+        if current_time - self.last_update >= 3:
             self.ip_index = (self.ip_index + 1) % len(self.ip_addresses)  # Increment index and cycle
             self.last_update = current_time
         current_ip = self.ip_addresses[self.ip_index]
