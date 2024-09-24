@@ -22,8 +22,8 @@ class OLEDStats(plugins.Plugin):
         self.ip_index = 0  # Track the current IP to display
         self.last_update = time.time()  # Last time system stats were updated
         self.last_ip_change = time.time()  # Last time the IP address was changed
-        self.stats_interval = 3  # Update system stats every 30 seconds
-        self.ip_change_interval = 5  # Change IP address display every 10 seconds
+        self.stats_interval = 30  # Update system stats every 30 seconds
+        self.ip_change_interval = 5  # Change IP address display every 5 seconds
 
         # Cache for system stats
         self.CPU = "N/A"
