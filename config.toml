@@ -1,8 +1,10 @@
-main.plugins.gpiocontrol.gpios.4.short_press = "python /home/pi/pwnmenucmd.py ok"
-main.plugins.gpiocontrol.gpios.4.long_press = "python /home/pi/pwnmenucmd.py close"
+# Config for buttons should include the gpio number of the button and the commands to run.
+#It needs separate lines for short/long press commands
 main.plugins.gpiocontrol.gpios.17.short_press = "echo 'Short Press on GPIO 17'"
 main.plugins.gpiocontrol.gpios.17.long_press = "echo 'Long Press on GPIO 17'"
 
+# Config for encoders should include the gpio number of the encoder pins, the gpio number of the button pin, and the commands to run.
+#It needs separate lines for up/down and short/long press commands.
 main.plugins.gpiocontrol.encoder.a = 5
 main.plugins.gpiocontrol.encoder.b = 6
 main.plugins.gpiocontrol.encoder.button = 13

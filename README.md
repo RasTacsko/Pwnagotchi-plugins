@@ -33,5 +33,3 @@ main.plugins.gpiocontrol.encoder.down_command = "echo 'Encoder Rotated Down'"
 main.plugins.gpiocontrol.encoder.short_press = "echo 'Encoder Button Short Pressed'"
 main.plugins.gpiocontrol.encoder.long_press = "echo 'Encoder Button Long Pressed'"
 ```
-
-
