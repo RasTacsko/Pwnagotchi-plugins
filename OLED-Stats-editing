@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+import threading
 from PIL import Image, ImageDraw, ImageFont
 from pwnagotchi.ui.hw.libs.i2coled.epd import EPD
 import pwnagotchi.plugins as plugins
@@ -80,14 +81,14 @@ class OLEDStats(plugins.Plugin):
             self.Disk = f"{int(disk_usage_percentage)}%"
             self.DiskGB = f"{int(free_gb)}/{int(total_gb)}GB free"
 
+            # Update IP addresses
+            ip_output = os.popen("hostname -I").read().strip()
+            self.ip_addresses = ip_output.split(' ') if ip_output else ["Unavailable"]
+
             # Get current date and time 
             now = datetime.now()
             self.date_str = now.strftime("%y-%m-%d")
             self.time_str = now.strftime("%H:%M")
-
-            # Update IP addresses
-            ip_output = os.popen("hostname -I").read().strip()
-            self.ip_addresses = ip_output.split(' ') if ip_output else ["Unavailable"]
             logging.info("stats update done")
 
         except Exception as e:
@@ -164,6 +165,7 @@ class OLEDStats(plugins.Plugin):
             self.oled1.display(self.image1)
             self.oled2.display(self.image2)
             logging.info("send fb to screen")
+        logging.info(f"Active threads after update: {threading.active_count()}")
 
     def on_unload(self, ui):
         self.active = False
