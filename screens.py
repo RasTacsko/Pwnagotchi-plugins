@@ -1,6 +1,5 @@
-        # Draw icons and system stats
-        self.draw1.rectangle((16, 0, 128, 63), outline=255, fill=255)
 		#first screen CPU
+        self.draw1.rectangle((16, 0, 128, 63), outline=255, fill=255)
         self.draw1.rectangle((0, 0, 15, 15), outline=255, fill=255)
         self.draw1.text((0, 1), chr(62171), font=self.icon_font, fill=0)  # CPU icon
         self.draw1.rectangle((0, 16, 15, 33), outline=0, fill=0)
@@ -13,6 +12,7 @@
         self.oled1.display(self.image1)
         time.sleep(5.0)
 		#second screen Temperature
+        self.draw1.rectangle((16, 0, 128, 63), outline=255, fill=255)
         self.draw1.rectangle((0, 0, 15, 15), outline=0, fill=0)
         self.draw1.text((0, 1), chr(62171), font=self.icon_font, fill=255)  # CPU icon
         self.draw1.rectangle((0, 16, 15, 33), outline=255, fill=255)
@@ -25,6 +25,7 @@
         self.oled1.display(self.image1)
         time.sleep(5.0)
 		#third screen Memory
+        self.draw1.rectangle((16, 0, 128, 63), outline=255, fill=255)
         self.draw1.rectangle((0, 0, 15, 15), outline=0, fill=0)
         self.draw1.text((0, 1), chr(62171), font=self.icon_font, fill=0)  # CPU icon
         self.draw1.rectangle((0, 16, 15, 33), outline=0, fill=0)
@@ -37,6 +38,7 @@
         self.oled1.display(self.image1)
         time.sleep(5.0)
 		#fourth screen Disk
+        self.draw1.rectangle((16, 0, 128, 63), outline=255, fill=255)
         self.draw1.rectangle((0, 0, 15, 15), outline=0, fill=0)
         self.draw1.text((0, 1), chr(62171), font=self.icon_font, fill=0)  # CPU icon
         self.draw1.rectangle((0, 16, 15, 33), outline=0, fill=0)
