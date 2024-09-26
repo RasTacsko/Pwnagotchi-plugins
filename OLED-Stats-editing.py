@@ -13,6 +13,10 @@ class OLEDStats(plugins.Plugin):
     __version__ = '0.3.1'
     __license__ = 'GPL3'
     __description__ = 'Hardware monitor for the waveshare OLED/LCD screen'
+    __defaults__ = {
+        'invert_colors': False,
+    }
+# to change to light bg main.plugins.OLED-Stats2.invert_colors = true    
 
     def __init__(self):
         self.I2C1 = 0x3C
@@ -95,13 +99,24 @@ class OLEDStats(plugins.Plugin):
             logging.error(f"Failed to update system stats: {e}")
 
     def on_loaded(self):
+        # Load configuration for color inversion
+        self.invert_colors = self.options.get('invert_colors', False)
+        if self.invert_colors == "true" or self.invert_colors is True:
+            self.fill_color = 0
+            self.bg_color = 255
+            logging.info("screens inverted")
+        else:
+            self.fill_color = 255
+            self.bg_color = 0
+            logging.info("screens normal")
         logging.info("OLED-Stats plugin loaded")
 
     def on_ui_update(self, ui):
         if not self.active:
             return  # Exit if the plugin has been unloaded
         # Get the current time
-        current_time = time.time()
+        current_time = time.time()    
+        logging.info("ui update started")
 
         # Update system stats and screens if the update interval has passed
         if current_time - self.last_update >= self.screen_update_interval:
@@ -110,22 +125,23 @@ class OLEDStats(plugins.Plugin):
             self.ip_index = (self.ip_index + 1) % len(self.ip_addresses)
             self.last_update = current_time  # Update the last screen change timestamp
             # Clear both OLED screens
-            self.draw1.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=0, fill=0)
-            self.draw2.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=0, fill=0)
+            self.draw1.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=0, fill=self.bg_color)
+            self.draw2.rectangle((0, 0, self.WIDTH, self.HEIGHT), outline=0, fill=self.bg_color)
+            logging.info("screens cleared")
+
             # Draw static icons for both screens with dynamic fills based on the current screen
-            cpu_fill = 0 if self.screen_index == 0 else 255
-            temp_fill = 0 if self.screen_index == 1 else 255
-            mem_fill = 0 if self.screen_index == 2 else 255
-            disk_fill = 0 if self.screen_index == 3 else 255
+            cpu_fill = self.fill_color if self.screen_index == 0 else self.bg_color
+            temp_fill = self.fill_color if self.screen_index == 1 else self.bg_color
+            mem_fill = self.fill_color if self.screen_index == 2 else self.bg_color
+            disk_fill = self.fill_color if self.screen_index == 3 else self.bg_color
             # Background fill parameters for active/inactive screens
-            cpu_bg_fill = 255 if self.screen_index == 0 else 0
-            temp_bg_fill = 255 if self.screen_index == 1 else 0
-            mem_bg_fill = 255 if self.screen_index == 2 else 0
-            disk_bg_fill = 255 if self.screen_index == 3 else 0
-            logging.info("static stuff drawing done")
+            cpu_bg_fill = self.bg_color if self.screen_index == 0 else self.fill_color
+            temp_bg_fill = self.bg_color if self.screen_index == 1 else self.fill_color
+            mem_bg_fill = self.bg_color if self.screen_index == 2 else self.fill_color
+            disk_bg_fill = self.bg_color if self.screen_index == 3 else self.fill_color
+            logging.info("icons color")
 
             # Screen 1 layout with icons and system stats
-            self.draw1.rectangle((16, 0, self.WIDTH, self.HEIGHT), outline=255, fill=255)
             self.draw1.rectangle((0, 0, 15, 15), outline=cpu_bg_fill, fill=cpu_bg_fill)
             self.draw1.text((0, 1), chr(62171), font=self.icon_font, fill=cpu_fill)  # CPU icon
             self.draw1.rectangle((0, 16, 15, 33), outline=temp_bg_fill, fill=temp_bg_fill)
@@ -134,32 +150,35 @@ class OLEDStats(plugins.Plugin):
             self.draw1.text((0, 33), chr(62776), font=self.icon_font, fill=mem_fill)  # Memory icon
             self.draw1.rectangle((0, 48, 15, 63), outline=disk_bg_fill, fill=disk_bg_fill)
             self.draw1.text((0, 49), chr(63426), font=self.icon_font, fill=disk_fill)  # Disk icon
+            logging.info("icons drawn")
+
             # Display specific stat on screen 1
             if self.screen_index == 0:
-                self.draw1.text((19, 0), f"CPU", font=self.font, fill=0)
-                self.draw1.text((26, 10), self.CPU, font=self.data_font, fill=0)
+                self.draw1.text((19, 0), f"CPU", font=self.font, fill=self.fill_color)
+                self.draw1.text((26, 10), self.CPU, font=self.data_font, fill=self.fill_color)
             elif self.screen_index == 1:
-                self.draw1.text((19, 0), f"TEMP", font=self.font, fill=0)
-                self.draw1.text((26, 10), self.Temperature, font=self.data_font, fill=0)
+                self.draw1.text((19, 0), f"TEMP", font=self.font, fill=self.fill_color)
+                self.draw1.text((26, 10), self.Temperature, font=self.data_font, fill=self.fill_color)
             elif self.screen_index == 2:
-                self.draw1.text((19, 0), f"RAM", font=self.font, fill=0)
-                self.draw1.text((26, 10), self.MemUsage, font=self.data_font, fill=0)
+                self.draw1.text((19, 0), f"RAM", font=self.font, fill=self.fill_color)
+                self.draw1.text((26, 10), self.MemUsage, font=self.data_font, fill=self.fill_color)
             elif self.screen_index == 3:
-                self.draw1.text((19, 0), f"HDD", font=self.font, fill=0)
-                self.draw1.text((26, 10), f"{self.Disk}", font=self.data_font, fill=0)
-                self.draw1.text((19, 49), f"{self.DiskGB}", font=self.font, fill=0)
-            logging.info("screen1 drawing done")
+                self.draw1.text((19, 0), f"HDD", font=self.font, fill=self.fill_color)
+                self.draw1.text((26, 10), f"{self.Disk}", font=self.data_font, fill=self.fill_color)
+                self.draw1.text((19, 49), f"{self.DiskGB}", font=self.font, fill=self.fill_color)
+            logging.info("display1 screen selected")
 
             # Screen 2 layout (show IP addresses and any other info)
             # Write the date and time to the second screen
-            self.draw2.text((0, 0), self.date_str, font=self.font, fill=255)
-            self.draw2.text((0, 10), self.time_str, font=self.data_font, fill=255)
-            
+            self.draw2.text((19, 0), self.date_str, font=self.font, fill=self.fill_color)
+            self.draw2.text((19, 10), self.time_str, font=self.data_font, fill=self.fill_color)
+            logging.info("time drawn")
+
             # Write the IP address with a wifi icon
-            self.draw2.rectangle((0, 48, 15, 63), outline=255, fill=255)
-            self.draw2.text((0, 49), chr(61931), font=self.icon_font, fill=0)  # Wi-Fi icon
-            self.draw2.text((19, 49), self.ip_addresses[self.ip_index], font=self.font, fill=255)
-            logging.info("screen2 drawing done")
+            self.draw2.rectangle((0, 48, 15, 63), outline=self.bg_color, fill=self.bg_color)
+            self.draw2.text((0, 49), chr(61931), font=self.icon_font, fill=self.fill_color)  # Wi-Fi icon
+            self.draw2.text((19, 49), self.ip_addresses[self.ip_index], font=self.font, fill=self.fill_color)
+            logging.info("ip drawn")
 
             # Display the images on both screens
             self.oled1.display(self.image1)
