@@ -2,11 +2,11 @@ import os
 import time
 import logging
 import threading
-from PIL import Image, ImageDraw, ImageFont
-from pwnagotchi.ui.hw.libs.i2coled.epd import EPD
-import pwnagotchi.plugins as plugins
-import pwnagotchi
 from datetime import datetime
+from PIL import Image, ImageDraw, ImageFont
+import pwnagotchi
+import pwnagotchi.plugins as plugins
+from pwnagotchi.ui.hw.libs.i2coled.epd import EPD
 
 class OLEDStats(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
@@ -63,11 +63,11 @@ class OLEDStats(plugins.Plugin):
         self.draw2 = ImageDraw.Draw(self.image2)
 
         # Fetch initial stats
-        self.update_stats()
+        # self.update_stats()
         logging.info("init done")
 
     def update_stats(self):
-        """Update system stats and IP addresses"""
+        # Update system stats and IP addresses
         try:
             # Update CPU, RAM and Temp data
             self.CPU = f"{int(pwnagotchi.cpu_load() * 100)}%"
@@ -101,19 +101,32 @@ class OLEDStats(plugins.Plugin):
     def on_loaded(self):
         # Load configuration for color inversion
         self.invert_colors = self.options.get('invert_colors', False)
-        if self.invert_colors == "true" or self.invert_colors is True:
+        # If set to auto, change color inversion based on time of day
+        if self.invert_colors == "auto":
+            current_hour = datetime.now().hour
+            if 6 <= current_hour < 18:
+                self.fill_color = 0  # Invert during daytime (6 AM to 6 PM)
+                self.bg_color = 255
+                logging.info("Screen inverted for daytime (6 AM - 6 PM)")
+            else:
+                self.fill_color = 255  # Normal at night (6 PM to 6 AM)
+                self.bg_color = 0
+                logging.info("Screen normal for nighttime (6 PM - 6 AM)")
+        elif self.invert_colors == "true":
             self.fill_color = 0
             self.bg_color = 255
-            logging.info("screens inverted")
+            logging.info("Screen inverted")
         else:
             self.fill_color = 255
             self.bg_color = 0
-            logging.info("screens normal")
+            logging.info("Screen normal")
         logging.info("OLED-Stats plugin loaded")
 
     def on_ui_update(self, ui):
+        # Exit if the plugin has been unloaded
         if not self.active:
-            return  # Exit if the plugin has been unloaded
+            return
+
         # Get the current time
         current_time = time.time()    
         logging.info("ui update started")
@@ -166,7 +179,7 @@ class OLEDStats(plugins.Plugin):
                 self.draw1.text((19, 0), f"HDD", font=self.font, fill=self.fill_color)
                 self.draw1.text((26, 10), f"{self.Disk}", font=self.data_font, fill=self.fill_color)
                 self.draw1.text((19, 49), f"{self.DiskGB}", font=self.font, fill=self.fill_color)
-            logging.info("display1 screen selected")
+            logging.info("display1 screen drawn")
 
             # Screen 2 layout (show IP addresses and any other info)
             # Write the date and time to the second screen
