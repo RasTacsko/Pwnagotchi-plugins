@@ -3,9 +3,9 @@ from gpiozero import Button, RotaryEncoder
 import subprocess
 import pwnagotchi.plugins as plugins
 
-class GPIOControl(plugins.Plugin):
+class GPIOButtons(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
-    __version__ = '0.1.1'
+    __version__ = '0.1.0'
     __license__ = 'GPL3'
     __description__ = 'GPIO Button and Rotary Encoder support plugin with long/short press functionality'
 
@@ -33,17 +33,15 @@ class GPIOControl(plugins.Plugin):
 
         for gpio, actions in gpios.items():
             gpio = int(gpio)
-            button = Button(gpio, pull_up=True, bounce_time=0.15, hold_time=1.0)  # hold_time is set to 1 second
+            button = Button(gpio, pull_up=True, bounce_time=0.1, hold_time=1.0)  # hold_time is set to 1 second
 
             short_press_command = actions.get('short_press')
             long_press_command = actions.get('long_press')
 
             if short_press_command:
-                # Use a default argument to bind the specific command to the event
-                button.when_pressed = lambda btn=button, cmd=short_press_command: self.runcommand(cmd)
+                button.when_pressed = lambda btn=button: self.runcommand(short_press_command)
             if long_press_command:
-                # Use a default argument to bind the specific command to the event
-                button.when_held = lambda btn=button, cmd=long_press_command: self.runcommand(cmd)
+                button.when_held = lambda btn=button: self.runcommand(long_press_command)
 
             self.buttons[gpio] = button
             logging.info("Configured GPIO #%d for short press: %s and long press: %s",
@@ -66,11 +64,11 @@ class GPIOControl(plugins.Plugin):
                 short_press_command = encoder_pins.get('short_press')
                 long_press_command = encoder_pins.get('long_press')
 
-                self.encoder_button = Button(button_pin, pull_up=True, bounce_time=0.15, hold_time=1.0)
+                self.encoder_button = Button(button_pin, pull_up=True, bounce_time=0.1, hold_time=1.0)
                 if short_press_command:
-                    self.encoder_button.when_pressed = lambda cmd=short_press_command: self.runcommand(cmd)
+                    self.encoder_button.when_pressed = lambda: self.runcommand(short_press_command)
                 if long_press_command:
-                    self.encoder_button.when_held = lambda cmd=long_press_command: self.runcommand(cmd)
+                    self.encoder_button.when_held = lambda: self.runcommand(long_press_command)
 
                 logging.info(f"Encoder button configured on pin: {button_pin} for short press: {short_press_command} and long press: {long_press_command}")
 
@@ -89,5 +87,5 @@ class GPIOControl(plugins.Plugin):
         if self.encoder_button:
             logging.info("Encoder button pressed!")
 
-    def on_unload(self):
-        logging.info("GPIO Button and Encoder control plugin unloaded.")
+    def on_unload(self, ui):
+        logging.info("GPIO Button and Encoder plugin unloaded.")
