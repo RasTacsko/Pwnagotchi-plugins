@@ -58,5 +58,5 @@ The OLEDstats folder contains the fonts, that are necessary for the plugin. Copy
 **Config**:
 ```toml
 # Config for the waveshare Oled/LCD hw monitor (light/dark/auto)
-main.plugins.OLED-Stats2.invert_colors = auto # black background at night, black text during the day
+main.plugins.OLED-Stats2.invert_colors = "auto" # black background at night, black text during the day
 ```
