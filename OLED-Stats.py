@@ -110,7 +110,7 @@ class OLEDStats(plugins.Plugin):
         # If set to auto, change color inversion based on time of day
         if self.color == "auto":
             current_hour = datetime.now().hour
-            if 6 <= current_hour < 17:
+            if 6 <= current_hour < 18:
                 self.fill_color = 0  # Invert during daytime (6 AM to 6 PM)
                 self.bg_color = 255
                 logging.info("Screen inverted for daytime (6 AM - 6 PM)")
