@@ -4,12 +4,13 @@
 
 A  bash script that downloads my pwny repo with the updated display drivers, and copies it to the necessary folders.
 Be aware that is made with chat gpt, and it is need internet connection of course, so use at your own risk.
-Just copy/create the file in /home/pi for example, 
+Just copy/create the file in /home/pi for example and
 ```bash
 sudo chmod +x displaydriverupdate.sh
 sudo ./displaydriverupdate.sh
 ```
 It will ask you what fw you have (32/64bit), and after updateing it cleans up the downloaded files.
+
 ***(Future plan: update the config.txt if needed for the spi LCD screens (`dtoverlay=spi0-0cs` to `dtoverlay=spi0-1cs`)
 Probably not necessary after next fw release)***
 
@@ -17,12 +18,14 @@ Probably not necessary after next fw release)***
 
 A  bash script for setting up ssh root login.
 It will ask for root passwd if not set before.
+
 **BE AWARE THAT THIS IS A BAD PRACTICE, USE AT YOUR OWN RISK!!!**
+
 I am just lazy, and when coding on the pi, it is easier to open the files directly.
 
 Just copy/create the file in /home/pi for example, 
 ```bash
-sudo chmod +x enable_root_ssh.shh
+sudo chmod +x enable_root_ssh.sh
 sudo ./enable_root_ssh.sh
 ```
 
@@ -30,6 +33,7 @@ sudo ./enable_root_ssh.sh
 
 An updated version of the default gpio_buttons plugin, based on gpiozero package instead of RPi.gpio
 It supports buttons (short and long press) and encoders (2 encoder pins, plus one button).
+
 **WORK IN PROGRESS!!!**
 
 **Config**:
