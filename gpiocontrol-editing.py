@@ -6,7 +6,7 @@ import pwnagotchi.plugins as plugins
 
 class GPIOControl(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
-    __version__ = '0.1.8'
+    __version__ = '0.1.9'
     __license__ = 'GPL3'
     __description__ = 'GPIO Button and Rotary Encoder support plugin with press, hold, and rotate logic.'
 
@@ -15,6 +15,7 @@ class GPIOControl(plugins.Plugin):
         self.button_hold_times = {}  # Track button press times
         self.encoder = None
         self.encoder_button = None
+        self.previous_step = 0
 
     def runcommand(self, command):
         logging.info(f"Running command: {command}")
@@ -46,7 +47,7 @@ class GPIOControl(plugins.Plugin):
         encoder_down_command = encoder_pins.get('down_command')
 
         if encoder_a and encoder_b:
-            self.encoder = RotaryEncoder(encoder_a, encoder_b, max_steps=1000, bounce_time=0.01)
+            self.encoder = RotaryEncoder(encoder_a, encoder_b, max_steps=1000, bounce_time=0.1, wrap=True)
             self.encoder.when_rotated = lambda: self.on_encoder_rotated(encoder_up_command, encoder_down_command)
             logging.info(f"Encoder configured with pins A: {encoder_a}, B: {encoder_b}")
         if encoder_button_pin:
@@ -76,14 +77,15 @@ class GPIOControl(plugins.Plugin):
     def on_encoder_rotated(self, up_command, down_command):
         """Handle encoder rotation."""
         steps = self.encoder.steps
-        if steps > 0:
+        if steps > self.previous_step:
             logging.info(f"Encoder rotated up. Running command: {up_command}")
             if up_command:
                 self.runcommand(up_command)
-        elif steps < 0:
+        elif steps < self.previous_step:
             logging.info(f"Encoder rotated down. Running command: {down_command}")
             if down_command:
                 self.runcommand(down_command)
+        self.previous_step = steps
 
     def on_unload(self, ui):
         logging.info("GPIO Button and Encoder control plugin unloaded.")
