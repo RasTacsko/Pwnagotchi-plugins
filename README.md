@@ -50,8 +50,8 @@ main.plugins.gpiocontrol.encoder.b = 6
 main.plugins.gpiocontrol.encoder.button = 13
 main.plugins.gpiocontrol.encoder.up_command = "echo 'Encoder Rotated Up'"
 main.plugins.gpiocontrol.encoder.down_command = "echo 'Encoder Rotated Down'"
-main.plugins.gpiocontrol.encoder.short_press = "echo 'Encoder Button Short Pressed'"
-main.plugins.gpiocontrol.encoder.long_press = "echo 'Encoder Button Long Pressed'"
+main.plugins.gpiocontrol.encoder.button_short_press = "echo 'Encoder Button Short Pressed'"
+main.plugins.gpiocontrol.encoder.button_long_press = "echo 'Encoder Button Long Pressed'"
 ```
 
 ### [**OLED-Stats.py**](https://github.com/RasTacsko/Pwnagotchi-plugins/blob/main/OLED-Stats.py "OLED-Stats.py")
