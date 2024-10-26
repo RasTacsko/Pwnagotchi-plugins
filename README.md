@@ -57,10 +57,10 @@ main.plugins.gpiocontrol.encoder.long_press = "echo 'Encoder Button Long Pressed
 ### [**OLED-Stats.py**](https://github.com/RasTacsko/Pwnagotchi-plugins/blob/main/OLED-Stats.py "OLED-Stats.py")
 
 A hardware monitor for the Waveshare OLED/LCD Screen
-Thefirst screen shows cpu/memory/temperature/storage stats, while the right screen shows date and time, with IP-addresses.
+The first screen shows cpu/memory/temperature/storage stats, while the right screen shows date and time, with IP-addresses.
 The OLEDstats folder contains the fonts, that are necessary for the plugin. Copy it to your plugins folder with the plugin.
 **Config**:
 ```toml
 # Config for the waveshare Oled/LCD hw monitor (light/dark/auto)
-main.plugins.OLED-Stats2.invert_colors = "auto" # black background at night, black text during the day
+main.plugins.OLED-Stats.color = "auto" # black background at night, black text during the day
 ```

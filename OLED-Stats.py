@@ -16,7 +16,7 @@ class OLEDStats(plugins.Plugin):
     __defaults__ = {
         'color': False,
     }
-# to change to light bg main.plugins.OLED-Stats2.color = light/dark/auto
+# to change to light bg main.plugins.OLED-Stats.color = light/dark/auto
 
     def __init__(self):
         self.I2C1 = 0x3C
