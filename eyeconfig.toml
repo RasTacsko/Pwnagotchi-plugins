@@ -1,0 +1,22 @@
+[screen]
+type = "oled" # "oled" or "lcd"
+driver = "ssd1306" # Screen driver chip
+width = 128
+height = 64
+connection = "i2c" # "i2c" or "spi"
+
+[screen.i2c]
+address = "0x3c" # I2C address (only for I2C connection)
+
+[eye.left]
+width = 36 # Width of the left eye
+height = 36 # Height of the left eye
+roundness = 8 # Roundness of the left eye
+
+[eye.right]
+width = 36 # Width of the right eye
+height = 36 # Height of the right eye
+roundness = 8 # Roundness of the right eye
+
+[eye]
+distance = 10 # Distance between the eyes
