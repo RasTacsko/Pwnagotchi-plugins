@@ -7,7 +7,7 @@ import toml
 from PIL import Image, ImageDraw
 from luma.core.interface.serial import i2c, spi
 from luma.oled.device import ssd1306
-from luma.lcd.device import ili9341
+from luma.lcd.device import st7789
 
 # Enable debug logging
 logging.basicConfig(
@@ -65,8 +65,8 @@ def init_screen(config):
         # Initialize device based on driver
         if driver == "ssd1306":
             device = ssd1306(serial, width=width, height=height)
-        elif driver == "ili9341":
-            device = ili9341(serial, width=width, height=height)
+        elif driver == "st7789":
+            device = st7789(serial, width=width, height=height)
         else:
             raise ValueError("Unsupported driver!")
 

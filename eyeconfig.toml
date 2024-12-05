@@ -1,22 +1,29 @@
 [screen]
-type = "oled" # "oled" or "lcd"
-driver = "ssd1306" # Screen driver chip
+type = "oled"           # "oled" or "lcd"
+driver = "ssd1306"      # Screen driver chip
 width = 128
 height = 64
-connection = "i2c" # "i2c" or "spi"
+rotate = 0              # 0, 90, 180, 270 if supported in th driver
+connection = "i2c"      # "i2c" or "spi"
 
-[screen.i2c]
-address = "0x3c" # I2C address (only for I2C connection)
+[screen.i2c]            # Config for I2C screens
+address = "0x3c"        # I2C address 
 
-[eye.left]
-width = 36 # Width of the left eye
-height = 36 # Height of the left eye
-roundness = 8 # Roundness of the left eye
-
-[eye.right]
-width = 36 # Width of the right eye
-height = 36 # Height of the right eye
-roundness = 8 # Roundness of the right eye
+[screen.spi]            # Config for SPI screens
+speed = 52000000        # spi bus speed
+dc = 22                 # Data/Command pin
+bl = 18                 # Backlight pin
+rst = 27                # Reset pin
 
 [eye]
-distance = 10 # Distance between the eyes
+distance = 10           # Distance between the eyes
+
+[eye.left]
+width = 36              # Width of the left eye
+height = 36             # Height of the left eye
+roundness = 8           # Roundness of the left eye
+
+[eye.right]
+width = 36              # Width of the right eye
+height = 36             # Height of the right eye
+roundness = 8           # Roundness of the right eye

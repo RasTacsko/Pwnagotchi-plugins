@@ -1,0 +1,15 @@
+[eye]
+distance = 10       # Distance between the two eyes
+
+[eye.left]
+width = 36          # Width of the left eye
+height = 36         # Height of the left eye
+roundness = 8       # Roundness of the left eye (corner radius)
+
+[eye.right]
+width = 36          # Width of the right eye
+height = 36         # Height of the right eye
+roundness = 8       # Roundness of the right eye
+
+[render]
+fps = 30            # Refresh rate of the animation
