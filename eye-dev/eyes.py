@@ -315,14 +315,13 @@ def on_idle(device, config):
             blinking = True
             blink_direction = -1  # Start shrinking
             
-        # current_mood = moods[mood_index]
-        # logging.info(f"Switching to mood: {current_mood or 'default'}")
-        # draw_eyes(device, config, mood=current_mood)  # Pass the mood to draw_eyes
-        # mood_index = (mood_index + 1) % len(moods)  # Cycle through moods
-        # time.sleep(3)  # Wait for 3 seconds
+        current_mood = moods[mood_index]
+        logging.info(f"Switching to mood: {current_mood or 'default'}")
+        mood_index = (mood_index + 1) % len(moods)  # Cycle through moods
+        time.sleep(3)  # Wait for 3 seconds
 
         # Draw eyes with current state
-        draw_eyes(device, config, current_offset_x, current_offset_y, blink_height_left, blink_height_right)
+        draw_eyes(device, config, current_offset_x, current_offset_y, blink_height_left, blink_height_right, mood=current_mood)
 
         # Wait to maintain 30 FPS
         time.sleep(interval)
@@ -335,65 +334,65 @@ def on_idle(device, config):
     # draw_eyes(device, config)
     # time.sleep(5)  # Keep the image on screen for 5 seconds
 
-def interpolate(value_from, value_to, step, total_steps):
-    """
-    Linearly interpolate between two values.
+# def interpolate(value_from, value_to, step, total_steps):
+    # """
+    # Linearly interpolate between two values.
     
-    :param value_from: Starting value
-    :param value_to: Target value
-    :param step: Current step in the transition
-    :param total_steps: Total number of steps in the transition
-    :return: Interpolated value
-    """
-    return value_from + (value_to - value_from) * (step / total_steps)
+    # :param value_from: Starting value
+    # :param value_to: Target value
+    # :param step: Current step in the transition
+    # :param total_steps: Total number of steps in the transition
+    # :return: Interpolated value
+    # """
+    # return value_from + (value_to - value_from) * (step / total_steps)
 
-def set_mood_with_transition(device, config, current_eye_config, target_mood, transition_speed):
-    """
-    Smoothly transition the eye shapes and eyelids to the target mood.
+# def set_mood_with_transition(device, config, current_eye_config, target_mood, transition_speed):
+    # """
+    # Smoothly transition the eye shapes and eyelids to the target mood.
 
-    :param device: Display device
-    :param config: Configuration dictionary.
-    :param current_eye_config: Current eye configuration (unused for now).
-    :param target_mood: Target mood name (e.g., "happy", "angry").
-    :param transition_speed: Number of frames for the transition.
-    """
-    if "moods" not in config or target_mood not in config["moods"]:
-        logging.warning(f"Mood '{target_mood}' not found in the configuration. Using default eye shapes.")
-        return current_eye_config  # No changes
+    # :param device: Display device
+    # :param config: Configuration dictionary.
+    # :param current_eye_config: Current eye configuration (unused for now).
+    # :param target_mood: Target mood name (e.g., "happy", "angry").
+    # :param transition_speed: Number of frames for the transition.
+    # """
+    # if "moods" not in config or target_mood not in config["moods"]:
+        # logging.warning(f"Mood '{target_mood}' not found in the configuration. Using default eye shapes.")
+        # return current_eye_config  # No changes
 
-    target_mood_config = config["moods"][target_mood]
-    logging.info(f"Transitioning to mood: {target_mood}")
+    # target_mood_config = config["moods"][target_mood]
+    # logging.info(f"Transitioning to mood: {target_mood}")
 
     # Perform smooth transition
-    for step in range(transition_speed + 1):
-        draw_eyes(
-            device,
-            eye_config=config["eye"],
-            eyelid_config=target_mood_config["eyelids"],
-            mood=target_mood,
-            step=step,
-            total_steps=transition_speed,
-        )
-        time.sleep(1 / config["render"]["fps"])
+    # for step in range(transition_speed + 1):
+        # draw_eyes(
+            # device,
+            # eye_config=config["eye"],
+            # eyelid_config=target_mood_config["eyelids"],
+            # mood=target_mood,
+            # step=step,
+            # total_steps=transition_speed,
+        # )
+        # time.sleep(1 / config["render"]["fps"])
 
-    return target_mood_config
+    # return target_mood_config
 
-def moodtest(device, config):
-    """
-    Test different moods by switching the eye shapes every 5 seconds.
+# def moodtest(device, config):
+    # """
+    # Test different moods by switching the eye shapes every 5 seconds.
 
-    :param device: Display device
-    :param config: Configuration dictionary
-    """
-    moods = ["happy", "angry", "tired", None]  # None represents the default mood
-    mood_index = 0
+    # :param device: Display device
+    # :param config: Configuration dictionary
+    # """
+    # moods = ["happy", "angry", "tired", None]  # None represents the default mood
+    # mood_index = 0
 
-    while True:
-        current_mood = moods[mood_index]
-        logging.info(f"Switching to mood: {current_mood or 'default'}")
-        draw_eyes(device, config, mood=current_mood)  # Pass the mood to draw_eyes
-        mood_index = (mood_index + 1) % len(moods)  # Cycle through moods
-        time.sleep(3)  # Wait for 5 seconds
+    # while True:
+        # current_mood = moods[mood_index]
+        # logging.info(f"Switching to mood: {current_mood or 'default'}")
+        # draw_eyes(device, config, mood=current_mood)  # Pass the mood to draw_eyes
+        # mood_index = (mood_index + 1) % len(moods)  # Cycle through moods
+        # time.sleep(3)  # Wait for 5 seconds
 
 def main():
     # Load screen and render configurations
