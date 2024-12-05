@@ -2,14 +2,24 @@
 distance = 10       # Distance between the two eyes
 
 [eye.left]
-width = 36          # Width of the left eye
-height = 36         # Height of the left eye
-roundness = 8       # Roundness of the left eye (corner radius)
+width = 36          # Default width of the left eye
+height = 36         # Default height of the left eye
+roundness = 8       # Default roundness of the left eye
 
 [eye.right]
-width = 36          # Width of the right eye
-height = 36         # Height of the right eye
-roundness = 8       # Roundness of the right eye
+width = 36          # Default width of the right eye
+height = 36         # Default height of the right eye
+roundness = 8       # Default roundness of the right eye
 
 [render]
-fps = 30            # Refresh rate of the animation
+fps = 30
+transition_speed = 5
+
+[moods.happy]
+eyelids = {top_height = 0, bottom_offset = 12}
+
+[moods.angry]
+eyelids = {top_height = 15, bottom_offset = 0}
+
+[moods.tired]
+eyelids = {top_height = 20, bottom_offset = 0}
