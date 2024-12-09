@@ -82,6 +82,7 @@ Implemented features:
   - Eye movement with look commands to cardinal directions (C,T,R,B,L and diagonals) and predefined speeds (slow, medium, fast).
   - Blinkng with predefined blink speeds (slow, medium, fast) and option for eyes (both, left, right).
   - Curious mode, where the outer eye is 40% larger, while the inner is 40% smaller than the default.
+
 Future plan:
   - Matching feature set with the arduino library.
   - Display support for all displays in the luma.oled/luma.lcd library.
