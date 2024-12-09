@@ -1,8 +1,8 @@
-# Pwnagotchi plugins made for my builds
+d# Pwnagotchi plugins made for my builds
 
 ### [displaydriverupdate.sh](https://github.com/RasTacsko/Pwnagotchi-plugins/blob/main/displaydriverupdate.sh "displaydriverupdate.sh")
 
-A  bash script that downloads my pwny repo with the updated display drivers, and copies it to the necessary folders.
+A  bash script that downloads my [pwnagotchi display repo](https://github.com/RasTacsko/pwnagotchi-displays) with the updated display drivers, and copies it to the necessary folders. Works on Jayofelonys 2.8.9 release!
 Be aware that is made with chat gpt, and it is need internet connection of course, so use at your own risk.
 Just copy/create the file in /home/pi for example and
 ```bash
@@ -34,8 +34,6 @@ sudo ./enable_root_ssh.sh
 An updated version of the default gpio_buttons plugin, based on gpiozero package instead of RPi.gpio
 It supports buttons (short and long press) and encoders (2 encoder pins, plus one button).
 
-**WORK IN PROGRESS!!!**
-
 **Config**:
 ```toml
 # Config for buttons should include the gpio number of the button and the commands to run.
@@ -64,3 +62,33 @@ The OLEDstats folder contains the fonts, that are necessary for the plugin. Copy
 # Config for the waveshare Oled/LCD hw monitor (light/dark/auto)
 main.plugins.OLED-Stats.color = "auto" # black background at night, black text during the day
 ```
+Future plan:
+  - 1 screen mode:
+  Rotating all info on one screen with date/time and IP icons on the right
+  2nd screen could be used for other plugins / animations
+
+### [**eyes.py**](https://github.com/RasTacsko/Pwnagotchi-plugins/blob/main/eyes.py "eyes.py")
+
+**WORK IN PROGRESS!!!**
+**Not working as a plugin yet, but can be tested from terminal**
+**Latest updates goes in the eye-dev folder**
+A cozmo/vector like eye plugin for the pwnagotchi, based on the [FluxGarage RoboEyes Library for arduino](https://github.com/FluxGarage/RoboEyes/tree/main).
+I try to translate the arduino libraries features to python as a framework for displaying the pwnagotchis mood on an oled screen.
+To make it flexible it is using the luma libraries for display handling, and PIL for drawing the frames from primitives (rounded rectangles, polygons etc.).
+Implemented features:
+  - SSD1306 driver is tested and working with 128x64 and 128x32 screens.
+  - Default eye and display settings are loaded from the script, but can be changed with eye.config.toml and screenconfig.toml.
+  - Predefined faces with "eyelids" to display more emotions (angry, tired, happy).
+  - Eye movement with look commands to cardinal directions (C,T,R,B,L and diagonals) and predefined speeds (slow, medium, fast).
+  - Blinkng with predefined blink speeds (slow, medium, fast) and option for eyes (both, left, right).
+  - Curious mode, where the outer eye is 40% larger, while the inner is 40% smaller than the default.
+Future plan:
+  - Matching feature set with the arduino library.
+  - Display support for all displays in the luma.oled/luma.lcd library.
+  - Fluid animation when changing faces (eyelid movement), and turning on/off curious mode (eye size).
+  - Fix the get_constraints to calculate with eye size changes during curious mode.
+  - Eye close/open commands for more animation options.
+  - Idle mode with autoblinker and random movements.
+  - Adding animations like wake_up, sleep etc.
+  - Adding values for happiness/angriness/tiredness to draw eyelids proportionally to these values.
+  - Eyeconfig randomizer. If the eyeconfig is not available for first run, the paramaters are choosen randomly or based on a seed like the pwnagotchis RSA-key (regarding the screen sizes to avoid extreme values), this way all pwnys could have different faces, but still could be edited after the first run.

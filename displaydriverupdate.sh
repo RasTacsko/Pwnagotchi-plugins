@@ -3,7 +3,7 @@
 set -e
 
 # Variables
-REPO_URL="https://github.com/RasTacsko/pwnagotchi_dipslayWIP.git"
+REPO_URL="https://github.com/RasTacsko/pwnagotchi-displays.git"
 CLONE_DIR="/tmp/DisplayDrivers"   # Temporary directory to clone the repository
 SOURCE_FILE="pwnagotchi/utils.py"  # Source file from the repo (relative to CLONE_DIR)
 SOURCE_DIR="pwnagotchi/ui/"        # Source folder from the repo (relative to CLONE_DIR)
