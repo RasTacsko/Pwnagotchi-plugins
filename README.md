@@ -75,6 +75,7 @@ Future plan:
 A cozmo/vector like eye plugin for the pwnagotchi, based on the [FluxGarage RoboEyes Library for arduino](https://github.com/FluxGarage/RoboEyes/tree/main).
 I try to translate the arduino libraries features to python as a framework for displaying the pwnagotchis mood on an oled screen.
 To make it flexible it is using the luma libraries for display handling, and PIL for drawing the frames from primitives (rounded rectangles, polygons etc.).
+
 Implemented features:
   - SSD1306 driver is tested and working with 128x64 and 128x32 screens.
   - Default eye and display settings are loaded from the script, but can be changed with eye.config.toml and screenconfig.toml.
