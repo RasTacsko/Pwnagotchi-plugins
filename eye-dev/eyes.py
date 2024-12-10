@@ -192,7 +192,7 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
     else:
         current_closed = closed  # Update global closed state
 
-    logging.debug(f"Drawing eyes with face: {face}, offset_x: {offset_x}, offset_y: {offset_y}, curious={curious}, command={command}")
+    # logging.debug(f"Drawing eyes with face: {face}, offset_x: {offset_x}, offset_y: {offset_y}, curious={curious}, command={command}")
 
     # Create a blank image
     image = Image.new(device.mode, (device.width, device.height), "black")
@@ -206,8 +206,22 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
     # Base dimensions for eyes
     eye_width_left = left_eye["width"]
     eye_width_right = right_eye["width"]
-    eye_height_left = blink_height_left if blink_height_left is not None else left_eye["height"]
-    eye_height_right = blink_height_right if blink_height_right is not None else right_eye["height"]
+    
+    if blink_height_left is not None or blink_height_right is not None:  # Animation in progress
+        eye_height_left = blink_height_left if blink_height_left is not None else left_eye["height"]
+        eye_height_right = blink_height_right if blink_height_right is not None else right_eye["height"]
+    elif closed == "both":
+        eye_height_left = 1
+        eye_height_right = 1
+    elif closed == "left":
+        eye_height_left = 1
+        eye_height_right = right_eye["height"]
+    elif closed == "right":
+        eye_height_left = left_eye["height"]
+        eye_height_right = 1
+    else:  # Open state
+        eye_height_left = left_eye["height"]
+        eye_height_right = right_eye["height"]
 
     # Apply curious effect dynamically
     if curious:
@@ -315,10 +329,11 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
 
     device.display(image)
 
-    # Handle look animations
     if command == "look" and target_offset_x is not None and target_offset_y is not None:
+        # Define movement speed
         movement_speed = {"fast": 8, "medium": 4, "slow": 2}.get(speed, 4)
         while current_offset_x != target_offset_x or current_offset_y != target_offset_y:
+            # Calculate new offsets
             if current_offset_x < target_offset_x:
                 current_offset_x = min(current_offset_x + movement_speed, target_offset_x)
             elif current_offset_x > target_offset_x:
@@ -329,8 +344,35 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
             elif current_offset_y > target_offset_y:
                 current_offset_y = max(current_offset_y - movement_speed, target_offset_y)
 
-            draw_eyes(device, config, offset_x=current_offset_x, offset_y=current_offset_y, face=current_face, curious=curious, closed=current_closed)
-            # time.sleep(1 / config["render"].get("fps", 30))
+            # Determine eye heights based on `current_closed`
+            if current_closed == "both":
+                blink_height_left = 1
+                blink_height_right = 1
+            elif current_closed == "left":
+                blink_height_left = 1
+                blink_height_right = config["eye"]["right"]["height"]
+            elif current_closed == "right":
+                blink_height_left = config["eye"]["left"]["height"]
+                blink_height_right = 1
+            else:  # Open state
+                blink_height_left = config["eye"]["left"]["height"]
+                blink_height_right = config["eye"]["right"]["height"]
+
+            # Render the frame
+            draw_eyes(
+                device,
+                config,
+                offset_x=current_offset_x,
+                offset_y=current_offset_y,
+                blink_height_left=blink_height_left,
+                blink_height_right=blink_height_right,
+                face=current_face,
+                curious=curious,
+                closed=current_closed,
+            )
+
+            # Allow smooth animation
+            time.sleep(1 / config["render"].get("fps", 30))
 
     # Handle blinking
     if command == "blink":
@@ -421,8 +463,6 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
 
     # Handle eye closing
     if command == "close":
-        if current_closed:  # If eyes are already closed, no need to animate
-            return
         # Default blink heights to original values if None
         left_eye_height_orig = config["eye"]["left"]["height"]
         right_eye_height_orig = config["eye"]["right"]["height"]
@@ -448,44 +488,57 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
                 blink_height_left=blink_height_left,
                 blink_height_right=blink_height_right,
                 face=current_face,
-                curious=curious,
+                curious=current_curious,
             )
 
             # Break when the eyes are fully closed
             if (blink_height_left <= 1 and eye in ["both", "left"]) and (
                 blink_height_right <= 1 and eye in ["both", "right"]
             ):
-                current_closed = True  # Update state to closed
+                current_closed = "both"  # Update state to closed
+                break
+            elif blink_height_left <= 1 and eye in ["both", "left"]:
+                current_closed = "left"  # Update state to closed
+                break
+            elif blink_height_right <= 1 and eye in ["both", "right"]:
+                current_closed = "right"  # Update state to closed
                 break
 
     # Handle eye opening
     elif command == "open":
-        if not current_closed:  # If eyes are already closed, no need to animate
+        if not current_closed:  # If eyes are already open, skip animation
+            logging.warning("Eyes are already open. Skipping animation.")
             return
-        # Default blink heights to original values if None
+
+        # Default blink heights based on current_closed state
         left_eye_height_orig = config["eye"]["left"]["height"]
         right_eye_height_orig = config["eye"]["right"]["height"]
 
-        if blink_height_left is None:
-            blink_height_left = 0  # Start from closed if opening
-        if blink_height_right is None:
-            blink_height_right = 0  # Start from closed if opening
+        # Ensure blink heights are initialized to their closed state
+        if current_closed == "both":
+            blink_height_left = 1
+            blink_height_right = 1
+        elif current_closed == "left":
+            blink_height_left = 1
+            blink_height_right = right_eye_height_orig
+        elif current_closed == "right":
+            blink_height_left = left_eye_height_orig
+            blink_height_right = 1
+        else:
+            # If eyes are already open, no need for animation
+            logging.info("Eyes are already open. Skipping opening animation.")
+            return
 
         # Define the speed of animation in pixels per frame
         movement_speed = {"fast": 12, "medium": 8, "slow": 4}.get(speed, 4)
 
         while True:
-            # Increment eye heights
             if eye in ["both", "left"]:
-                blink_height_left += movement_speed
-                if blink_height_left >= left_eye_height_orig:
-                    blink_height_left = left_eye_height_orig  # Final adjustment
+                blink_height_left = min(left_eye_height_orig, blink_height_left + movement_speed)
             if eye in ["both", "right"]:
-                blink_height_right += movement_speed
-                if blink_height_right >= right_eye_height_orig:
-                    blink_height_right = right_eye_height_orig  # Final adjustment
+                blink_height_right = min(right_eye_height_orig, blink_height_right + movement_speed)
 
-            # Draw the current frame
+            # Draw the current frame of the open animation
             draw_eyes(
                 device,
                 config,
@@ -495,18 +548,20 @@ def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=No
                 blink_height_right=blink_height_right,
                 face=current_face,
                 curious=current_curious,
-                command=None,
             )
 
-            # Exit when both eyes are fully open
-            if (
-                (blink_height_left >= left_eye_height_orig and eye in ["both", "left"])
-                and (blink_height_right >= right_eye_height_orig and eye in ["both", "right"])
+            # Break when the eyes are fully open
+            if (blink_height_left >= left_eye_height_orig and eye in ["both", "left"]) and (
+                blink_height_right >= right_eye_height_orig and eye in ["both", "right"]
             ):
+                current_closed = None  # Update state to open
                 break
-
-        # Update global eye_close state
-        current_closed = False
+            elif blink_height_left >= left_eye_height_orig and eye in ["both", "left"]:
+                current_closed = "right" if current_closed == "both" else None  # Only right remains closed
+                break
+            elif blink_height_right >= right_eye_height_orig and eye in ["both", "right"]:
+                current_closed = "left" if current_closed == "both" else None  # Only left remains closed
+                break
 
 def get_constraints(config, device):
     """
@@ -606,14 +661,16 @@ def look(device, config, direction="C", speed="fast", face=None, curious=None, c
     draw_eyes(
         device,
         config,
+        offset_x=current_offset_x,
+        offset_y=current_offset_y,
         face=current_face,
-        curious=curious,
-        closed=current_closed,
+        curious=current_curious,
         command="look",
         target_offset_x=target_offset_x,
         target_offset_y=target_offset_y,
         speed=speed,
     )
+
 def blink(device, config, eye="both", speed="fast", face=None, curious=None, closed=None):
     """
     Pass blink command and parameters to the draw_eyes function.
@@ -664,15 +721,18 @@ def eye_close(device, config, eye="both", speed="medium", face=None, curious=Non
     
 def eye_open(device, config, eye="both", speed="medium", face=None, curious=None, closed=None):
     """
-    Pass open command and parameters to the draw_eyes function.
+    Pass the 'open' command and parameters to the draw_eyes function.
     """
     global current_face, current_offset_x, current_offset_y, current_curious, current_closed
+
     logging.info(f"Starting opening animation for {eye} eye(s) at {speed} speed with face: {current_face}, curious={curious}")
-    
-    if closed is None:
-        closed = current_closed
-    else:
-        current_closed = closed  # Update global closed state
+
+    # Ensure eyes start from their current closed state
+    if current_closed is None:
+        logging.warning("Eyes are already open. Skipping animation.")
+        return  # Exit if eyes are already open
+
+    # Call the draw_eyes function with the "open" command
     draw_eyes(
         device,
         config,
@@ -689,15 +749,26 @@ def main():
     # Load screen and render configurations
     screen_config = load_config("screenconfig.toml", DEFAULT_SCREEN_CONFIG)
     render_config = load_config("eyeconfig.toml", DEFAULT_RENDER_CONFIG)
+
     # Merge configurations
     config = {**screen_config, **render_config}
+
     # Initialize the display device
     device = get_device(config)
 
     # Main loop to test look functionality
     draw_eyes(device, config)
     time.sleep(1)
-    draw_eyes(device, config, face="angry")
+    # Close the eyes
+    eye_close(device, config, speed="slow")
+    time.sleep(1)
+
+    # Open the eyes
+    eye_open(device, config, speed="slow")
+    time.sleep(1)
+
+
+    draw_eyes(device, config, face="angry", curious=True)
     time.sleep(1)
     blink(device, config, speed="fast")
     time.sleep(1)
@@ -705,35 +776,30 @@ def main():
     # Close the eyes
     eye_close(device, config, speed="slow")
     time.sleep(1)
+    look(device, config, direction="L", speed="fast", face="tired")
     eye_open(device, config, speed="slow")
     time.sleep(1)
 
-    # Close the left eye
-    # eye_close(device, config, speed="fast", eye="left")
-    # time.sleep(1)
-    # eye_open(device, config, speed="fast", eye="left")
-    # time.sleep(1)
-
-    # Close the right eye
-    # eye_close(device, config, speed="fast", eye="right")
-    # time.sleep(1)
-    # eye_open(device, config, speed="fast", eye="right")
-
-    look(device, config, direction="L", speed="fast", curious=True)
-
-    eye_close(device, config, speed="medium")
+    # Close the eyes
+    eye_close(device, config, speed="slow", eye="left")
     time.sleep(1)
-    look(device, config, direction="T", speed="fast", face="tired", curious=False)
-    eye_open(device, config, speed="medium")
+    eye_open(device, config, speed="slow", eye="left")
     time.sleep(1)
-    
-    look(device, config, direction="T", speed="fast", face="tired", curious=False)
+
+    # Close the eyes
+    eye_close(device, config, speed="fast", eye="right", curious=False)
     time.sleep(1)
-    blink(device, config, speed="fast", eye="left")
+    eye_open(device, config, speed="fast", eye="right")
+
+    look(device, config, direction="L", speed="fast")
+
+    look(device, config, direction="C", speed="fast", face="tired")
+    time.sleep(1)
+    blink(device, config, speed="medium", eye="left")
     time.sleep(1)
     blink(device, config, speed="fast", eye="right")
     time.sleep(1)
-    blink(device, config, speed="medium")
+    blink(device, config, speed="slow")
 
     look(device, config, direction="R", speed="fast", face="tired", curious=True)
     time.sleep(1)
@@ -752,6 +818,7 @@ def main():
     time.sleep(1)
 
     look(device, config, direction="T", speed="medium")  # Look top-right at medium speed
+    blink(device, config, speed="medium", eye="left")
     time.sleep(1)
 
     look(device, config, direction="C", speed="fast")
