@@ -828,6 +828,21 @@ def eye_open(device, config, eye="both", speed="medium", face=None, curious=None
         eye=eye,
     )
 
+def wakeup(device, config, eye="both", speed="medium", face=None, curious=None, closed=None):
+    """
+    Drawing wakeup animation: closed tired, open slow, close slow, open medium, close medium, open fast, default
+    """
+    global current_face, current_offset_x, current_offset_y, current_curious, current_closed
+    draw_eyes(device, config, face="tired", closed="both")
+    eye_open(device, config, speed="slow")
+    eye_close(device, config, speed="slow")
+    time.sleep(2)
+    eye_open(device, config, speed="medium")
+    eye_close(device, config, speed="medium")
+    time.sleep(1)
+    eye_open(device, config, speed="fast")
+    draw_eyes(device, config, face="default")
+
 def main():
     # Load screen and render configurations
     screen_config = load_config("screenconfig.toml", DEFAULT_SCREEN_CONFIG)
@@ -839,80 +854,62 @@ def main():
     # Initialize the display device
     device = get_device(config)
 
-    # Main loop to test look functionality
+    # Main loop to test wakeup animation
+    logging.info(f"Starting main loop to test wakeup animation")
+    wakeup(device, config)
+
+    # Main loop to test face change animation
+    logging.info(f"Starting main loop to test face change animation")
     draw_eyes(device, config)
-    time.sleep(1)
+    time.sleep(3)    
     draw_eyes(device, config, face="happy")
     time.sleep(3)
-    draw_eyes(device, config, face="angry", speed="medium")
+    draw_eyes(device, config, face="angry")
     time.sleep(3)
-    draw_eyes(device, config, face="tired", speed="fast")
+    draw_eyes(device, config, face="tired")
     time.sleep(3)
-    draw_eyes(device, config)
-    time.sleep(3)
-    
-    
-    
-    draw_eyes(device, config)
-    time.sleep(1)
-    eye_close(device, config, speed="slow")
-    time.sleep(1)
-    eye_open(device, config, speed="slow")
-    time.sleep(1)
 
+    # Main loop to test look animation with curious mode on
+    logging.info(f"Starting main loop to test look animation with curious mode on")
+    look(device, config, direction="TL", speed="fast", curious=True)
+    time.sleep(1)
+    look(device, config, direction="T", speed="fast")
+    time.sleep(1)
+    look(device, config, direction="TR", speed="fast")
+    time.sleep(1)
+    look(device, config, direction="L", speed="medium")
+    time.sleep(1)
+    look(device, config, direction="R", speed="medium")
+    time.sleep(1)
+    look(device, config, direction="BL", speed="slow")
+    time.sleep(1)
+    look(device, config, direction="B", speed="slow")
+    time.sleep(1)
+    look(device, config, direction="BR", speed="slow")
+    time.sleep(1)
+    look(device, config, direction="C", speed="slow", curious=False)
 
-    draw_eyes(device, config, face="angry", curious=True)
+    # Main loop to test blink animation
+    logging.info(f"Starting main loop to test blink animation")
+    blink(device, config)
     time.sleep(1)
-    blink(device, config, speed="fast")
+    blink(device, config, speed="slow", eye="left")
     time.sleep(1)
+    blink(device, config, speed="fast", eye="right")
 
-    eye_close(device, config, speed="slow")
+    # Main loop to test close/open animation
+    logging.info(f"Starting main loop to test close/open animation")
+    eye_close(device, config)
     time.sleep(1)
-    look(device, config, direction="L", speed="fast", face="tired")
-    eye_open(device, config, speed="slow")
+    eye_open(device, config)
     time.sleep(1)
     eye_close(device, config, speed="slow", eye="left")
     time.sleep(1)
     eye_open(device, config, speed="slow", eye="left")
     time.sleep(1)
-
-    eye_close(device, config, speed="fast", eye="right", curious=False)
+    eye_close(device, config, speed="fast", eye="right")
     time.sleep(1)
     eye_open(device, config, speed="fast", eye="right")
-
-    look(device, config, direction="L", speed="fast")
-
-    look(device, config, direction="C", speed="fast", face="tired")
-    time.sleep(1)
-    blink(device, config, speed="medium", eye="left")
-    time.sleep(1)
-    blink(device, config, speed="fast", eye="right")
-    time.sleep(1)
-    blink(device, config, speed="slow")
-
-    look(device, config, direction="R", speed="fast", face="tired", curious=True)
-    time.sleep(1)
-    blink(device, config, speed="medium", eye="left")
-    time.sleep(1)
-    blink(device, config, speed="fast", eye="right")
-    time.sleep(1)
-    blink(device, config, speed="slow")
-
-    look(device, config, direction="TL", speed="medium")  # Look left slowly
-    blink(device, config, speed="medium", eye="left")
-    time.sleep(1)
-
-    look(device, config, direction="TR", speed="medium")  # Look top-right at medium speed
-    blink(device, config, speed="medium", eye="right")
-    time.sleep(1)
-
-    look(device, config, direction="T", speed="medium")  # Look top-right at medium speed
-    blink(device, config, speed="medium", eye="left")
-    time.sleep(1)
-
-    look(device, config, direction="C", speed="fast")
-    draw_eyes(device, config, face="happy")
-    time.sleep(1)
 
 if __name__ == "__main__":
     main()
