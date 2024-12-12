@@ -833,7 +833,9 @@ def wakeup(device, config, eye="both", speed="medium", face=None, curious=None, 
     Drawing wakeup animation: closed tired, open slow, close slow, open medium, close medium, open fast, default
     """
     global current_face, current_offset_x, current_offset_y, current_curious, current_closed
-    draw_eyes(device, config, face="tired", closed="both")
+    draw_eyes(device, config, closed="both")
+    draw_eyes(device, config, face="tired")
+    time.sleep(2)
     eye_open(device, config, speed="slow")
     eye_close(device, config, speed="slow")
     time.sleep(2)
