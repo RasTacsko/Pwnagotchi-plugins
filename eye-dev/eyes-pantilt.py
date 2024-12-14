@@ -7,6 +7,7 @@ from PIL import Image, ImageDraw
 from luma.core.interface.serial import i2c, spi
 import luma.oled.device as oled
 import luma.lcd.device as lcd
+import pantilthat
 
 # Enable debug logging
 logging.basicConfig(
@@ -18,13 +19,13 @@ logging.basicConfig(
 DEFAULT_SCREEN_CONFIG = {
     "screen": {
         "type": "oled",
-        "driver": "ssd1306",
+        "driver": "sh1107",
         "width": 128,
-        "height": 64,
-        "rotate": 0,
+        "height": 128,
+        "rotate": 2,
         "interface": "i2c",
         "i2c": {
-            "address": "0x3C",
+            "address": "0x3d",
             "i2c_port": 1,
         },
     }
@@ -38,13 +39,13 @@ DEFAULT_RENDER_CONFIG = {
     "eye": {
         "distance": 10,  # Default distance between eyes
         "left": {
-            "width": 32,
-            "height": 32,
+            "width": 36,
+            "height": 36,
             "roundness": 8,
         },
         "right": {
-            "width": 32,
-            "height": 32,
+            "width": 36,
+            "height": 36,
             "roundness": 8,
         },
     },
@@ -56,8 +57,6 @@ current_offset_x = 0
 current_offset_y = 0
 current_curious = False
 current_closed = False
-current_bg_color = "black"
-current_eye_color = "yellow"
 
 def load_config(file_path, default_config):
     """
@@ -144,7 +143,6 @@ def get_device(config):
 
         logging.info(f"Initialized {screen['type']} screen with driver {driver_name}.")
         return device
-        
     except ValueError as e:
         logging.error(f"Configuration error: {e}")
         sys.exit(1)
@@ -152,7 +150,7 @@ def get_device(config):
         logging.error(f"Error initializing screen: {e}")
         sys.exit(1)
 
-def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offset_y=None, blink_height_left=None, blink_height_right=None, 
+def draw_eyes(device, config, offset_x=None, offset_y=None, blink_height_left=None, blink_height_right=None, 
               face=None, curious=None, command=None, target_offset_x=None, target_offset_y=None, speed="medium", 
               eye="both", closed=None):
     """
@@ -173,18 +171,8 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
     :param speed: Speed of animation ("fast", "medium", "slow")
     :param eye: Specify which eye to blink ("left", "right", or "both")
     """
-    global current_bg_color, current_eye_color, current_face, current_offset_x, current_offset_y, current_curious, current_closed  # Use global variables for state
+    global current_face, current_offset_x, current_offset_y, current_curious, current_closed  # Use global variables for state
 
-    # Default black background and yellow eyecolor when using a color screen
-    if device.mode == "1":  # Monochrome OLED
-        bg_color = "black"
-        eye_color = "white"
-    else:  # Color LCD
-        if bg_color is None:
-            bg_color = current_bg_color or config["color"]["bg"]
-        if eye_color is None:
-            eye_color = current_eye_color or config["color"]["eye"]
-        
     # Default to global offsets if not explicitly provided
     if offset_x is None:
         offset_x = current_offset_x
@@ -275,7 +263,7 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
                 curious=current_curious,
                 command=None,  # Prevent recursion
             )
-            time.sleep(1 / config["render"].get("fps", 30))
+            # time.sleep(1 / config["render"].get("fps", 30))
 
         return  # Exit after adjustment
 
@@ -290,8 +278,8 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
     else:
         current_closed = closed  # Update global closed state
 
-    # Dynamically create an image based on the device mode
-    image = Image.new(device.mode, (device.width, device.height), bg_color)
+    # Create a blank image
+    image = Image.new(device.mode, (device.width, device.height), "black")
     draw = ImageDraw.Draw(image)
 
     # Eye parameters
@@ -357,8 +345,8 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
         device.height // 2 + eye_height_right // 2 + offset_y,
     )
 
-    draw.rounded_rectangle(left_eye_coords, radius=roundness_left, outline=eye_color, fill=eye_color)
-    draw.rounded_rectangle(right_eye_coords, radius=roundness_right, outline=eye_color, fill=eye_color)
+    draw.rounded_rectangle(left_eye_coords, radius=roundness_left, outline=1, fill=1)
+    draw.rounded_rectangle(right_eye_coords, radius=roundness_right, outline=1, fill=1)
 
     # Default eyelid heights
     eyelid_bottom_left_height = 0
@@ -386,7 +374,7 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
             (left_eye_coords[2], left_eye_coords[1]),
             (left_eye_coords[2], left_eye_coords[1] + eyelid_top_inner_left_height),
             (left_eye_coords[0], left_eye_coords[1] + eyelid_top_outer_left_height),
-        ], fill=bg_color)
+        ], fill=0)
 
     if eyelid_top_inner_right_height or eyelid_top_outer_right_height > 0:
         draw.polygon([
@@ -394,7 +382,7 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
             (right_eye_coords[2], right_eye_coords[1]),
             (right_eye_coords[2], right_eye_coords[1] + eyelid_top_outer_right_height),
             (right_eye_coords[0], right_eye_coords[1] + eyelid_top_inner_right_height),
-        ], fill=bg_color)
+        ], fill=0)
 
     # Draw bottom eyelids
     if eyelid_bottom_left_height > 0:
@@ -406,8 +394,8 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
                 left_eye_coords[3],
             ),
             radius=roundness_left,
-            outline=bg_color,
-            fill=bg_color,
+            outline=0,
+            fill=0,
         )
 
     if eyelid_bottom_right_height > 0:
@@ -419,8 +407,8 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
                 right_eye_coords[3],
             ),
             radius=roundness_right,
-            outline=bg_color,
-            fill=bg_color,
+            outline=0,
+            fill=0,
         )
 
     device.display(image)
@@ -468,7 +456,7 @@ def draw_eyes(device, config, bg_color=None, eye_color=None, offset_x=None, offs
             )
 
             # Allow smooth animation
-            time.sleep(1 / config["render"].get("fps", 30))
+            # time.sleep(1 / config["render"].get("fps", 30))
 
     # Handle blinking
     if command == "blink":
@@ -728,30 +716,48 @@ def look(device, config, direction="C", speed="fast", face=None, curious=None, c
     if direction == "L":
         target_offset_x = min_x_offset
         target_offset_y = 0
+        pantilthat.pan(-33)
+        pantilthat.tilt(0)
     elif direction == "R":
         target_offset_x = max_x_offset
         target_offset_y = 0
+        pantilthat.pan(33)
+        pantilthat.tilt(0)
     elif direction == "T":
         target_offset_x = 0
         target_offset_y = min_y_offset
+        pantilthat.pan(0)
+        pantilthat.tilt(-33)
     elif direction == "B":
         target_offset_x = 0
         target_offset_y = max_y_offset
+        pantilthat.pan(0)
+        pantilthat.tilt(33)
     elif direction == "TL":
         target_offset_x = min_x_offset
         target_offset_y = min_y_offset
+        pantilthat.pan(-33)
+        pantilthat.tilt(-33)
     elif direction == "TR":
         target_offset_x = max_x_offset
         target_offset_y = min_y_offset
+        pantilthat.pan(33)
+        pantilthat.tilt(-33)
     elif direction == "BL":
         target_offset_x = min_x_offset
         target_offset_y = max_y_offset
+        pantilthat.pan(-33)
+        pantilthat.tilt(33)
     elif direction == "BR":
         target_offset_x = max_x_offset
         target_offset_y = max_y_offset
+        pantilthat.pan(33)
+        pantilthat.tilt(33)
     else:  # Center
         target_offset_x = 0
         target_offset_y = 0
+        pantilthat.pan(0)
+        pantilthat.tilt(0)
 
     # Pass the animation command to `draw_eyes`
     draw_eyes(
@@ -851,10 +857,9 @@ def wakeup(device, config, eye="both", speed="medium", face=None, curious=None, 
     time.sleep(2)
     eye_open(device, config, speed="slow")
     eye_close(device, config, speed="slow")
-    time.sleep(2)
+    time.sleep(1)
     eye_open(device, config, speed="medium")
     eye_close(device, config, speed="medium")
-    time.sleep(1)
     eye_open(device, config, speed="fast")
     draw_eyes(device, config, face="default")
 
@@ -874,35 +879,37 @@ def main():
     wakeup(device, config)
 
     # Main loop to test face change animation
-    logging.info(f"Starting main loop to test face change animation")
-    draw_eyes(device, config)
-    time.sleep(3)    
-    draw_eyes(device, config, face="happy")
-    time.sleep(3)
-    draw_eyes(device, config, face="angry")
-    time.sleep(3)
-    draw_eyes(device, config, face="tired")
-    time.sleep(3)
+    # logging.info(f"Starting main loop to test face change animation")
+    # draw_eyes(device, config)
+    # time.sleep(3)    
+    # draw_eyes(device, config, face="happy")
+    # time.sleep(3)
+    # draw_eyes(device, config, face="angry")
+    # time.sleep(3)
+    # draw_eyes(device, config, face="tired")
+    # time.sleep(3)
 
     # Main loop to test look animation with curious mode on
     logging.info(f"Starting main loop to test look animation with curious mode on")
+    look(device, config, direction="C", speed="medium")
+    time.sleep(1)
     look(device, config, direction="TL", speed="fast", curious=True)
     time.sleep(1)
     look(device, config, direction="T", speed="fast")
     time.sleep(1)
     look(device, config, direction="TR", speed="fast")
     time.sleep(1)
-    look(device, config, direction="L", speed="medium")
+    look(device, config, direction="L", speed="fast")
     time.sleep(1)
-    look(device, config, direction="R", speed="medium")
+    look(device, config, direction="R", speed="fast")
     time.sleep(1)
-    look(device, config, direction="BL", speed="slow")
+    look(device, config, direction="BL", speed="fast")
     time.sleep(1)
-    look(device, config, direction="B", speed="slow")
+    look(device, config, direction="B", speed="fast")
     time.sleep(1)
-    look(device, config, direction="BR", speed="slow")
+    look(device, config, direction="BR", speed="fast")
     time.sleep(1)
-    look(device, config, direction="C", speed="slow", curious=False)
+    look(device, config, direction="C", speed="fast", curious=False)
 
     # Main loop to test blink animation
     logging.info(f"Starting main loop to test blink animation")

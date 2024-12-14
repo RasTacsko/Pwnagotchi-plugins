@@ -1,39 +1,39 @@
 [screen]
 # General screen configuration
-type = ""                 # Screen type: "oled" or "lcd"
-driver = ""               # Screen driver chip (e.g., ssd1306, ili9341, st7789, etc.)
-width = 0                 # Screen width in pixels
-height = 0                # Screen height in pixels
+type = "lcd"                 # Screen type: "oled" or "lcd"
+driver = "st7789"               # Screen driver chip (e.g., ssd1306, ili9341, st7789, etc.)
+width = 320                 # Screen width in pixels
+height = 240                # Screen height in pixels
 rotate = 0                # Rotation factor: 0, 90, 180, 270
-interface = "i2c"         # Interface type: "i2c" or "spi"
+interface = "spi"         # Interface type: "i2c" or "spi"
 framebuffer = "diff_to_previous" # Framebuffer mode for supported displays ("diff_to_previous" or "full_frame")
 block_orientation = 0     # Fix 90° phase error for some displays (e.g., MAX7219). Allowed values: 0, 90, -90, 180
-mode = ""                 # Color mode for specific screens (e.g., "1", "RGB", "RGBA")
+mode = "RGB"                 # Color mode for specific screens (e.g., "1", "RGB", "RGBA")
 num_segments = 4          # Number of segments for framebuffer implementation (default: 4)
 bgr = false               # Set if LCD pixels are in BGR format
 inverse = false           # Set if LCD has inverted colors (white and black swapped)
-h_offset = 0              # Horizontal offset for some displays (e.g., ST7735)
-v_offset = 0              # Vertical offset for some displays (e.g., ST7735)
+h_offset = 40              # Horizontal offset for some displays (e.g., ST7735)
+v_offset = 52              # Vertical offset for some displays (e.g., ST7735)
 backlight_active = "low"  # Backlight polarity ("low" or "high")
 
-[i2c]
+[screen.i2c]
 # I2C-specific settings
 address = ""              # I2C address (e.g., "0x3C")
 i2c_port = 1              # I2C bus number (default: 1)
 
-[spi]
+[screen.spi]
 # SPI-specific settings
 spi_port = 0              # SPI port number (default: 0)
 spi_device = 0            # SPI device number (default: 0)
-spi_bus_speed = 8000000   # SPI bus speed (Hz)
+spi_bus_speed = 40000000   # SPI bus speed (Hz)
 spi_transfer_size = 4096  # SPI transfer unit size (bytes)
 spi_cs_high = false       # SPI chip select is high (default: false)
 
-[gpio]
+[screen.gpio]
 # GPIO pin settings for SPI displays
-gpio_data_command = 0     # GPIO pin for D/C (Data/Command)
-gpio_chip_select = 0      # GPIO pin for CS (Chip Select)
-gpio_reset = 0            # GPIO pin for RESET
-gpio_backlight = 0        # GPIO pin for BACKLIGHT (if applicable)
+gpio_data_command = 25     # GPIO pin for D/C (Data/Command)
+gpio_chip_select = 6      # GPIO pin for CS (Chip Select)
+gpio_reset = 27            # GPIO pin for RESET
+gpio_backlight = 18        # GPIO pin for BACKLIGHT (if applicable)
 gpio_reset_hold_time = 0  # Duration to hold RESET line active on startup (seconds)
 gpio_reset_release_time = 0 # Duration to pause after releasing RESET line (seconds)

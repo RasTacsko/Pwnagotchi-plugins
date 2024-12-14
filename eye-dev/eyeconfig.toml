@@ -1,25 +1,17 @@
 [eye]
-distance = 10       # Distance between the two eyes
+distance = 20       # Distance between the two eyes
 
 [eye.left]
-width = 36          # Default width of the left eye
-height = 36         # Default height of the left eye
-roundness = 8       # Default roundness of the left eye
+width = 64          # Default width of the left eye
+height = 64         # Default height of the left eye
+roundness = 16      # Default roundness of the left eye
 
 [eye.right]
-width = 36          # Default width of the right eye
-height = 36         # Default height of the right eye
-roundness = 8       # Default roundness of the right eye
+width = 64          # Default width of the right eye
+height = 64         # Default height of the right eye
+roundness = 16      # Default roundness of the right eye
 
-[render]
-fps = 30
-transition_speed = 5
-
-[moods.happy]
-eyelids = {top_height = 0, bottom_offset = 12}
-
-[moods.angry]
-eyelids = {top_height = 15, bottom_offset = 0}
-
-[moods.tired]
-eyelids = {top_height = 20, bottom_offset = 0}
+[color]
+bg = "yellow"		# Apply only for color screens
+eye = "red"		    # Apply only for color screens
+# Values currently set to color 320x240 screen! for i2c oled use the nondev eyeconfig!

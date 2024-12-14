@@ -1,0 +1,18 @@
+sudo apt install python3-pip python3-setuptools python3-dev python3-pantilt
+git clone https://github.com/rm-hull/luma.core.git
+cd luma.core
+pip install -r requirements.txt
+sudo python3 setup.py install
+cd~
+git clone https://github.com/rm-hull/luma.oled.git
+cd luma.oled
+sudo python3 setup.py install
+cd~
+git clone https://github.com/rm-hull/luma.lcd.git
+cd luma.lcd
+pip install -r requirements.txt
+sudo python3 setup.py install
+
+git clone https://github.com/rm-hull/luma.examples.git
+cd luma.examples
+sudo python3 examples/demo.py --display st7789 --width 320 --height 240 --spi-port 0 --spi-device 0 --gpio-reset 27 --gpio-data-command 22 --backlight-active high --interface spi
