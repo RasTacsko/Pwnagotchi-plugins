@@ -1,4 +1,4 @@
-sudo apt install python3-pip python3-setuptools python3-dev python3-pantilt
+sudo apt install python3-pip python3-setuptools python3-dev python3-pantilthat
 git clone https://github.com/rm-hull/luma.core.git
 cd luma.core
 pip install -r requirements.txt
@@ -14,5 +14,24 @@ pip install -r requirements.txt
 sudo python3 setup.py install
 
 git clone https://github.com/rm-hull/luma.examples.git
+
+
+
+
 cd luma.examples
-sudo python3 examples/demo.py --display st7789 --width 320 --height 240 --spi-port 0 --spi-device 0 --gpio-reset 27 --gpio-data-command 22 --backlight-active high --interface spi
+sudo python3 examples/demo.py --display st7789 --width 320 --height 240 --spi-port 0 --spi-device 0 --gpio-reset 27 --gpio-data-command 25 --backlight-active low --interface spi
+
+config.txt:
+dtparam=i2c_arm=on,i2c_arm_baudrate=400000
+
+pan tilt hat:
+https://thepihut.com/products/pan-tilt-hat?variant=696837832721
+there is no head pack now but can bought separately:
+https://thepihut.com/products/mini-pan-tilt-kit-assembled-with-micro-servos?variant=27739702673
+stemmaqt oled screen:
+https://thepihut.com/products/adafruit-monochrome-1-12-128x128-oled-graphic-display-stemma-qt-qwiic?variant=41322023583939
+stemma cable with female connectors to connect the screen:
+https://thepihut.com/products/stemma-qt-qwiic-jst-sh-4-pin-cable-with-premium-female-sockets-150mm-long
+male headers for the pantilt hat (works with friction fit but I will solder it):
+https://thepihut.com/products/break-away-0-1-36-pin-strip-right-angle-male-header-10-pack
+And all of it is on a pi3A+ with the geekworm case

@@ -3,6 +3,8 @@ import sys
 import toml
 import random
 import time
+import math
+import threading
 from PIL import Image, ImageDraw
 from luma.core.interface.serial import i2c, spi
 import luma.oled.device as oled
@@ -691,6 +693,8 @@ def look(device, config, direction="C", speed="fast", face=None, curious=None, c
     :param speed: Speed of movement ("fast", "medium", "slow")
     :param face: Optional face parameter to change during the animation
     :param curious: Optional toggle for curious mode
+    Move the eyes and pan-tilt HAT to a specific position based on the direction.
+    Screen animation happens first, followed by smooth servo movement.
     """
     global current_face, current_offset_x, current_offset_y, current_curious, current_closed
 
@@ -700,78 +704,120 @@ def look(device, config, direction="C", speed="fast", face=None, curious=None, c
     if curious is not None:
         current_curious = curious
     else:
-        curious = current_curious  # Fall back to global curious state
-        
+        curious = current_curious
+
     if closed is None:
         closed = current_closed
     else:
-        current_closed = closed  # Update global closed state
+        current_closed = closed
 
     logging.info(f"Starting look animation towards {direction} at {speed} speed with face: {current_face}, curious={curious}")
 
     # Get movement constraints
     min_x_offset, max_x_offset, min_y_offset, max_y_offset = get_constraints(config, device)
 
-    # Determine target offsets based on direction
+    # Determine target offsets and pan-tilt angles
     if direction == "L":
         target_offset_x = min_x_offset
         target_offset_y = 0
-        pantilthat.pan(-33)
-        pantilthat.tilt(0)
+        target_pan, target_tilt = -33, 0
     elif direction == "R":
         target_offset_x = max_x_offset
         target_offset_y = 0
-        pantilthat.pan(33)
-        pantilthat.tilt(0)
+        target_pan, target_tilt = 33, 0
     elif direction == "T":
         target_offset_x = 0
         target_offset_y = min_y_offset
-        pantilthat.pan(0)
-        pantilthat.tilt(-33)
+        target_pan, target_tilt = 0, -33
     elif direction == "B":
         target_offset_x = 0
         target_offset_y = max_y_offset
-        pantilthat.pan(0)
-        pantilthat.tilt(33)
+        target_pan, target_tilt = 0, 33
     elif direction == "TL":
         target_offset_x = min_x_offset
         target_offset_y = min_y_offset
-        pantilthat.pan(-33)
-        pantilthat.tilt(-33)
+        target_pan, target_tilt = -33, -33
     elif direction == "TR":
         target_offset_x = max_x_offset
         target_offset_y = min_y_offset
-        pantilthat.pan(33)
-        pantilthat.tilt(-33)
+        target_pan, target_tilt = 33, -33
     elif direction == "BL":
         target_offset_x = min_x_offset
         target_offset_y = max_y_offset
-        pantilthat.pan(-33)
-        pantilthat.tilt(33)
+        target_pan, target_tilt = -33, 33
     elif direction == "BR":
         target_offset_x = max_x_offset
         target_offset_y = max_y_offset
-        pantilthat.pan(33)
-        pantilthat.tilt(33)
+        target_pan, target_tilt = 33, 33
     else:  # Center
         target_offset_x = 0
         target_offset_y = 0
-        pantilthat.pan(0)
-        pantilthat.tilt(0)
+        target_pan, target_tilt = 0, 0
 
-    # Pass the animation command to `draw_eyes`
-    draw_eyes(
-        device,
-        config,
-        offset_x=current_offset_x,
-        offset_y=current_offset_y,
-        face=current_face,
-        curious=current_curious,
-        command="look",
-        target_offset_x=target_offset_x,
-        target_offset_y=target_offset_y,
-        speed=speed,
-    )
+    # Convert speed to duration for smooth movement
+    speed_map = {"slow": 0.8, "medium": 0.5, "fast": 0.3}
+    duration = speed_map.get(speed, 1)
+
+    # Define the screen animation thread
+    def animate_screen():
+        draw_eyes(
+            device,
+            config,
+            offset_x=current_offset_x,
+            offset_y=current_offset_y,
+            face=current_face,
+            curious=current_curious,
+            command="look",
+            target_offset_x=target_offset_x,
+            target_offset_y=target_offset_y,
+            speed=speed,
+        )
+
+    # Define the servo movement thread
+    def animate_servos():
+        smooth_move(target_pan, target_tilt, duration=duration)
+
+    # Create threads for both tasks
+    screen_thread = threading.Thread(target=animate_screen)
+    servo_thread = threading.Thread(target=animate_servos)
+
+    # Start both threads
+    screen_thread.start()
+    servo_thread.start()
+
+    # Wait for both threads to finish
+    screen_thread.join()
+    servo_thread.join()
+    
+def smooth_move(target_pan, target_tilt, duration=1.5, step_delay=0.01):
+    """
+    Smoothly move the pan-tilt HAT to the target position over the given duration,
+    using a sinusoidal speed curve for smooth acceleration and deceleration.
+    
+    :param target_pan: Target pan angle (-90 to 90)
+    :param target_tilt: Target tilt angle (-90 to 90)
+    :param duration: Total duration for the movement in seconds
+    :param step_delay: Delay between each step in seconds
+    """
+    current_pan = pantilthat.get_pan() or 0
+    current_tilt = pantilthat.get_tilt() or 0
+    
+    steps = int(duration / step_delay)
+    
+    for i in range(steps):
+        # Calculate the progress ratio (0 to 1) with a sinusoidal easing function
+        progress = i / steps
+        eased_progress = 0.5 * (1 - math.cos(math.pi * progress))  # Sinusoidal easing
+        
+        # Interpolate the pan and tilt positions
+        interpolated_pan = current_pan + (target_pan - current_pan) * eased_progress
+        interpolated_tilt = current_tilt + (target_tilt - current_tilt) * eased_progress
+        
+        # Update the pan-tilt HAT
+        pantilthat.pan(round(interpolated_pan))
+        pantilthat.tilt(round(interpolated_tilt))
+        
+        time.sleep(step_delay)
 
 def blink(device, config, eye="both", speed="fast", face=None, curious=None, closed=None):
     """
