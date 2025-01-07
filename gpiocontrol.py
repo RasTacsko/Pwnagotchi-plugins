@@ -1,12 +1,13 @@
 import logging
-from gpiozero import Button, RotaryEncoder
+from gpiozero import Button, RotaryEncoder, Device
+from gpiozero.pins.pigpio import PiGPIOFactory
 import subprocess
 import time
 import pwnagotchi.plugins as plugins
 
 class GPIOControl(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
-    __version__ = '0.1.9'
+    __version__ = '0.1.10'
     __license__ = 'GPL3'
     __description__ = 'GPIO Button and Rotary Encoder support plugin with press, hold, and rotate logic.'
 
@@ -89,3 +90,11 @@ class GPIOControl(plugins.Plugin):
 
     def on_unload(self, ui):
         logging.info("GPIO Button and Encoder control plugin unloaded.")
+        # Clean up GPIO resources
+        for button in self.buttons.values():
+            button.close()
+        if self.encoder:
+            self.encoder.close()
+        if self.encoder_button:
+            self.encoder_button.close()
+        Device.close()

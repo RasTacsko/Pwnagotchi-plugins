@@ -35,3 +35,10 @@ https://thepihut.com/products/stemma-qt-qwiic-jst-sh-4-pin-cable-with-premium-fe
 male headers for the pantilt hat (works with friction fit but I will solder it):
 https://thepihut.com/products/break-away-0-1-36-pin-strip-right-angle-male-header-10-pack
 And all of it is on a pi3A+ with the geekworm case
+
+
+https://pypi.org/project/pillow/
+https://pypi.org/project/luma.core/
+https://pypi.org/project/luma.oled/
+https://pypi.org/project/luma.lcd/
+https://pypi.org/project/luma.emulator/
