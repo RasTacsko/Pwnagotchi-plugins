@@ -6,7 +6,7 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import pwnagotchi
 import pwnagotchi.plugins as plugins
-from pwnagotchi.ui.hw.libs.i2coled.lcd import LCD
+from pwnagotchi.ui.hw.libs.i2coled.oled import OLED
 
 class OLEDStats(plugins.Plugin):
     __author__ = 'https://github.com/RasTacsko'
@@ -49,14 +49,14 @@ class OLEDStats(plugins.Plugin):
         self.icon_font = ImageFont.truetype(icon_font_path, 16)
 
         # Initialize OLED display 1
-        self.oled1 = LCD(address=self.I2C1, width=self.WIDTH, height=self.HEIGHT)
+        self.oled1 = OLED(address=self.I2C1, width=self.WIDTH, height=self.HEIGHT)
         self.oled1.Init()
         self.oled1.Clear()
         self.image1 = Image.new('1', (self.WIDTH, self.HEIGHT))
         self.draw1 = ImageDraw.Draw(self.image1)
 
         # Initialize OLED display 2
-        self.oled2 = LCD(address=self.I2C2, width=self.WIDTH, height=self.HEIGHT)
+        self.oled2 = OLED(address=self.I2C2, width=self.WIDTH, height=self.HEIGHT)
         self.oled2.Init()
         self.oled2.Clear()
         self.image2 = Image.new('1', (self.WIDTH, self.HEIGHT))
